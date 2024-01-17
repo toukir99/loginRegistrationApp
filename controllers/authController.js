@@ -11,13 +11,14 @@ const hashPassword = (password) => {
 
 const registerUser = async (req, res) => {
   const transaction = await sequelize.transaction();
-
+  console.log(typeof req.body);
   try {
     const { first_name, last_name, email, password, nid, age, marital_status } = req.body;
     const profilePhoto = req.file ? req.file.path : null;
-
+    
     const alreadyExistsUser = await Auth.findOne({ where: { email }});
     if(alreadyExistsUser){
+      await transaction.rollback();
       throw new Error('User already exists!');
     }
     
@@ -26,9 +27,9 @@ const registerUser = async (req, res) => {
 
     // Create user in Auth table
     const authRecord = await Auth.create({ email, password: hashedPassword }, { transaction });
-
     // Handle failed registration
     if (!authRecord) {
+      await transaction.rollback();
       throw new Error('User registration failed!');
     }
 
@@ -37,13 +38,18 @@ const registerUser = async (req, res) => {
       user_id: authRecord.id,
       first_name,
       last_name,
-      email,
       nid,
       profilePhoto,
       age,
       marital_status,
     }, { transaction });
 
+    // Handle failed registration
+    if (!profileRecord) {
+      await transaction.rollback();
+      throw new Error('User registration failed!');
+    }
+  
     // Commit the transaction if both records are created successfully
     await transaction.commit();
 
@@ -93,7 +99,7 @@ const loginUser = async (req, res) => {
     await transaction.commit();
 
     // Success
-    return res.status(200).json({ message: 'You are logged in!', auth_token: newAuthToken });
+    return res.status(200).json({ message: 'You are logged in!', auth_token: newAuthToken, user_id: authUser.id });
   } catch (error) {
     // Rollback the transaction if an error occurs
     await transaction.rollback();

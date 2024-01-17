@@ -18,7 +18,7 @@ const Profile = sequelize.define('Profile', {
         allowNull: false,
     },
     nid: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         allowNull: false,
     },
     profilePhoto: {

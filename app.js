@@ -1,13 +1,12 @@
 require('dotenv').config();
 const express = require('express');
-const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
 const app = express();
 
 // Middleware
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 // Routes
 app.use('/auth', authRoutes);
