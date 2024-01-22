@@ -1,29 +1,23 @@
 // models/auth.js
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const mongoose = require('mongoose');
 
-// Creating auth model
-const Auth = sequelize.define('Auth', {
-    id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-    },
+const authSchema = new mongoose.Schema({
     email: {
-        type: DataTypes.STRING,
-        allowNull: false,
+        type: String,
         unique: true,
+        required: true,
     },
     password: {
-        type: DataTypes.STRING,
-        allowNull: false,
+        type: String,
+        required: true,
     },
     auth_token: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
+        type: 'UUID',
+        default: () => randomUUID()
     },
-}, {
-    timestamps: true, 
+},{
+    timestamps: true,
 });
 
+const Auth = mongoose.model("authModel", authSchema);
 module.exports = Auth;

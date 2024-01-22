@@ -1,41 +1,38 @@
 // models/profile.js
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const mongoose = require('mongoose');
 
-// Creating profile model
-const Profile = sequelize.define('Profile', {
+const profileSchema = new mongoose.Schema({
     user_id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
+        type: mongoose.Schema.Types.ObjectId,
+        unique: true,
     },
     first_name: {
-        type: DataTypes.STRING,
-        allowNull: false,
+        type: String,
+        required: true,
     },
     last_name: {
-        type: DataTypes.STRING,
-        allowNull: false,
+        type: String,
+        required: true,
     },
     nid: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
-    profilePhoto: {
-        type: DataTypes.STRING,
-        allowNull: true,
+        type: Number,
+        required: true,
     },
     age: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
+        type: Number,
+        required: true,
+    },
+    profilePhoto: {
+        type: String,
+        required: false,
     },
     marital_status: {
-        type: DataTypes.STRING,
-        allowNull: false,
+        type: String,
+        required: true,
     },
-   
-}, {
+},{
     timestamps: true,
 });
 
+const Profile = mongoose.model("profileModel", profileSchema);
 module.exports = Profile;

@@ -11,17 +11,17 @@ const authenticateUser = async (req, res, next) => {
 
   try {
     // Check if the user exists in the database with the provided auth_token (UUID)
-    const authUser = await Auth.findOne({ where: { auth_token: authToken } });
+    const authUser = await Auth.findOne({ auth_token: authToken });
     if (!authUser) {
       throw new error('Invalid auth_token!');
     }
 
     // Set user information in req.user
-    req.user = { id: authUser.id, email: authUser.email, };
+    req.user = { user_id: authUser._id, email: authUser.email };
     next();
   } catch (error) {
     console.error(error);
-    return res.status(401).json({ success: false, message: 'Authentication failed!' });
+    return res.status(401).json({ success: false, message: `Authentication failed! ${error.message}` });
   }
 };
 

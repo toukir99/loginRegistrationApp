@@ -1,17 +1,13 @@
 // controllers/profileController.js
 const Profile = require('../models/profile');
 const Auth = require('../models/auth');
+const mongoose = require('mongoose');
 
 // Update Profile 
 const updateProfile = async (req, res) => {
   try {
     let userId = req.params.user_id;
-    userId = Number(userId);
-   
-    // Ensure that one user cannot update data of other users
-    if (userId !== req.user.id) {
-      throw new error('Authentication Error!');
-    }
+    userId = new mongoose.Types.ObjectId(userId);
     
     let profilePhoto;
     if(req.file){
@@ -22,7 +18,7 @@ const updateProfile = async (req, res) => {
     const { first_name, last_name, nid, age, marital_status } = req.body;
     
     // Build an object with only the allowed fields
-    const updatedProfiles = {
+    const updatedProfile = {
       first_name: first_name,
       last_name: last_name,
       nid: nid,
@@ -32,14 +28,14 @@ const updateProfile = async (req, res) => {
     };
 
     // Update user profile data with only the allowed fields
-    let resultUpdateProfile = await Profile.update(updatedProfiles, { where: { user_id: userId } });
-    if (resultUpdateProfile) {
-      return res.status(200).json({ success: true, message: 'Successfully updated!', profile: updatedProfiles });
+    let resultUpdateProfile = await Profile.updateOne({ user_id: userId }, { $set: updatedProfile });
+    if (resultUpdateProfile.modifiedCount > 0) {
+      return res.status(200).json({ success: true, message: 'Update successful!', profile: updatedProfile });
     } else {
-      throw new error('Profile is not found!');
+      throw new Error('Profile not found or no changes were made!');
     }
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Update failed' });
+    res.status(500).json({ success: false, message: 'Update failed!' });
   }
 };
 
@@ -48,25 +44,19 @@ const updateProfile = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     let userId = req.params.user_id;
-    userId = Number(userId);
+    userId = new mongoose.Types.ObjectId(userId);
 
-    // Ensure that one user cannot delete other users
-    if (userId !== req.user.id) {
-      throw new Error('Authentication Error!');
-    }
+    // Delete user profile and user auth data
+    const resultDeletedAuth = await Auth.deleteOne({ _id: userId });
+    const resultDeletedProfile = await Profile.deleteOne({ user_id: userId });
 
-    // Delete user profile data
-    const resultDeleteProfile = await Profile.destroy({ where: { user_id: userId } });
-    const resultDeleteAuth = await Auth.destroy({ where: { id: userId } });
-
-    if (resultDeleteProfile && resultDeleteAuth) {
-      return res.status(200).json({ success: true, message: 'User successfully deleted!' });
-    } else {
-      throw new Error('User not found!');
-    }
+    if (resultDeletedProfile.deletedCount > 0 && resultDeletedAuth.deletedCount > 0) {
+      return res.status(200).json({ message: 'User deleted!' });
+  } else {
+      throw new Error('Profile not found or no changes made!');
+  }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Delete failed' });
+    res.status(500).json({ success: false, message: 'Internal Server Error & failed to delete user profile' });
   }
 };
 
@@ -75,15 +65,10 @@ const deleteUser = async (req, res) => {
 const getUserProfile = async (req, res) => {
   try {
     let userId = req.params.user_id;
-    userId = Number(userId);
-
-    // Ensure that one user cannot access data of other users
-    if (userId !== req.user.id) {
-      throw new Error('Authentication Error!');
-    }
+    userId = new mongoose.Types.ObjectId(userId);
 
     // Retrieve user profile data
-    const userProfile = await Profile.findOne({ where: { user_id: userId } });
+    const userProfile = await Profile.findOne({ user_id: userId });
 
     if (userProfile) {
       return res.status(200).json({ success: true, profile: userProfile });
@@ -91,8 +76,7 @@ const getUserProfile = async (req, res) => {
       throw new Error('Profile not found!');
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Failed to get user profile' });
+    res.status(500).json({ success: false, message: 'Internal Error & failed to get user profile!' });
   }
 };
 
