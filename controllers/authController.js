@@ -25,8 +25,9 @@ const registerUser = async (req, res) => {
     const hashedPassword = hashPassword(password);
 
     // Create user in Auth table
-    const authRecord = new Auth({ email, password: hashedPassword, auth_token: uuidv4() });
-    await authRecord.save();
+    // const authRecord = new Auth({ email, password: hashedPassword, auth_token: uuidv4() });
+    // await authRecord.save();
+    const authRecord = await Auth.create({ email, password: hashedPassword, auth_token: uuidv4() });
 
     // Handle failed registration
     if (!authRecord) {
@@ -34,9 +35,9 @@ const registerUser = async (req, res) => {
     }
 
     // Create profileRecord of the user in Profile table
-    const profileRecord = new Profile({ user_id: authRecord._id, first_name, last_name, nid, age, profilePhoto, marital_status });
-    await profileRecord.save();
-
+    // const profileRecord = new Profile({ user_id: authRecord._id, first_name, last_name, nid, age, profilePhoto, marital_status });
+    // await profileRecord.save();
+    const profileRecord = await Profile.create({ user_id: authRecord._id, first_name, last_name, nid, age, profilePhoto, marital_status });
 
     // Handle failed registration
     if (!profileRecord) {
