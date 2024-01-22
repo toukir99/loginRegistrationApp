@@ -15,10 +15,9 @@ const registerUser = async (req, res) => {
   try {
     const { first_name, last_name, email, password, nid, age, marital_status } = req.body;
     const profilePhoto = req.file ? req.file.path : null;
-    //console.log(req.body);
-    const alreadyExistsUser = await Auth.findOne({ where: { email }});
+
+    const alreadyExistsUser = await Auth.findOne({ email });
     if(alreadyExistsUser){
-      await transaction.rollback();
       throw new Error('User already exists!');
     }
     
