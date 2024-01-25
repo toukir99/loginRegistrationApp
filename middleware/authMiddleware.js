@@ -18,6 +18,8 @@ const authenticateUser = async (req, res, next) => {
 
     // Set user information in req.user
     req.user = { user_id: authUser._id, email: authUser.email };
+    
+    // No error occurred, proceed to the next middleware or route
     next();
   } catch (error) {
     console.error(error);
