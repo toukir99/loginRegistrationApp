@@ -1,4 +1,4 @@
-# Registration and Authentication API
+# Login-registration and Authentication API
 
 This repository contains Node.js APIs for user registration, authentication, profile management, and account deletion. The APIs are available in two versions: one built with MySQL and Sequelize, and the other with MongoDB and Mongoose. Both versions handle encryption for sensitive information such as passwords.
 
